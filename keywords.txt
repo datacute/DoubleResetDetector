@@ -1,0 +1,23 @@
+#######################################
+# Syntax Coloring Map For Messenger
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+detectDoubleReset		KEYWORD2
+doubleResetDetected	KEYWORD2
+loop	KEYWORD2
+stop	KEYWORD2
+#######################################
+# Instances (KEYWORD2)
+#######################################
+DoubleResetDetector	KEYWORD2
+#######################################
+# Constants (LITERAL1)
+#######################################
