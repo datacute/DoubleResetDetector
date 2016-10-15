@@ -8,30 +8,32 @@
 #ifndef DoubleResetDetector_H__
 #define DoubleResetDetector_H__
 
-#include <FS.h>
-
 #if defined(ARDUINO) && (ARDUINO >= 100)
 #include <Arduino.h>
 #else
 #include <WProgram.h>
 #endif
 
-#define DOUBLERESETDETECTOR_VERSION "0.0.1"
+#define DOUBLERESETDETECTOR_VERSION "0.0.2"
+#define DOUBLERESETDETECTOR_FLAG_SET 0xD0D01234
+#define DOUBLERESETDETECTOR_FLAG_CLEAR 0xD0D04321
 
 class DoubleResetDetector
 {
 public:
-	DoubleResetDetector(int timeout);
-	void detectDoubleReset();
-	void detectDoubleReset(bool mounted);
-	bool doubleResetDetected();
+	DoubleResetDetector(int timeout, int address);
+	bool detectDoubleReset();
+	bool doubleResetDetected;
 	void loop();
 	void stop();
 	
 private:
 	int timeout;
-	bool waitingForDoubleReboot;
-	bool doubleReset;
-	bool fsMounted;
+	int address;
+	bool waitingForDoubleReset;
+	bool detectRecentlyResetFlag();
+	void clearRecentlyResetFlag();
+	void setRecentlyResetFlag();
+	uint32_t doubleResetDetectorFlag;
 };
 #endif // DoubleResetDetector_H__

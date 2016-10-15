@@ -1,46 +1,29 @@
-#include <FS.h>
 #include <DoubleResetDetector.h>
 
 // Number of seconds after reset during which a 
 // subseqent reset will be considered a double reset.
 #define DRD_TIMEOUT 10
 
-DoubleResetDetector drd(DRD_TIMEOUT);
+// RTC Memory Address for the DoubleResetDetector to use
+#define DRD_ADDRESS 0
 
-bool fsMounted = false;
-
-// The Double Reset Detector uses the SPIFFS.
-// If you also wish to use SPIFFS in your code,
-// then you can inform the Double Reset Detector
-// that it has been mounted.
-void initFS()
-{
-  Serial.println("Mounting FS...");
-
-  fsMounted = SPIFFS.begin();
-  if (fsMounted) {
-    Serial.println("Mounted file system");
-    drd.detectDoubleReset(fsMounted);
-
-    // use SPIFFS in your own code here
-    
-  } else {
-    Serial.println("Failed to mount FS");
-  }
-}
+DoubleResetDetector drd(DRD_TIMEOUT, DRD_ADDRESS);
 
 void setup()
 {
+  pinMode(LED_BUILTIN, OUTPUT);
+  
   Serial.begin(9600);
+  Serial.println();
   Serial.println("DoubleResetDetector Example Program");
   Serial.println("-----------------------------------");
 
-  initFS();
-
-  if (drd.doubleResetDetected()) {
+  if (drd.detectDoubleReset()) {
     Serial.println("Double Reset Detected");
+    digitalWrite(LED_BUILTIN, LOW);
   } else {
     Serial.println("No Double Reset Detected");
+    digitalWrite(LED_BUILTIN, HIGH);
   }
 }
 
@@ -52,4 +35,3 @@ void loop()
   // consider the next reset as a double reset.
   drd.loop();
 }
-

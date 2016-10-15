@@ -6,62 +6,53 @@
  */
 
 #include "DoubleResetDetector.h"
-#define DEBUG_DOUBLERESETCONFIG
 
-DoubleResetDetector::DoubleResetDetector(int timeout) {
+// Flag which will be stored in RTC memory.
+// A uint32_t is used so that two different magic numbers can be used, 
+// without accidentally overwriting memory used for another purpose.
+uint32_t doubleResetDetectorFlag;
+
+DoubleResetDetector::DoubleResetDetector(int timeout, int address) {
 	this->timeout = timeout*1000;
-	fsMounted = false;
-	doubleReset = false;
-	waitingForDoubleReboot = false;
+	this->address = address;
+	doubleResetDetected = false;
+	waitingForDoubleReset = false;
 }
 
-void DoubleResetDetector::detectDoubleReset() {
-  fsMounted = SPIFFS.begin();
-  detectDoubleReset(fsMounted);
-}
-
-void DoubleResetDetector::detectDoubleReset(bool mounted) {
-  fsMounted = mounted;
-  if (!fsMounted) return;
-  // This file's existance means we were recently reset
-  if (SPIFFS.exists("/booted")) {
-    Serial.println("/booted already exists. Double reset detected.");
-    if (!SPIFFS.remove("/booted")) {
-      Serial.println("failed to remove /booted");
-    } else {
-      Serial.println("/booted removed");
-    }
-    doubleReset = true;
-  } else {
-    File bootedFile = SPIFFS.open("/booted", "w");
-    if (!bootedFile) {
-      Serial.println("failed to open config file for writing");
-    } else {
-      bootedFile.println("booted");
-      bootedFile.close();
-      Serial.println("/booted created to help detect a double reset.");
-      waitingForDoubleReboot = true;
-    }
-    doubleReset = false;
-  }
-}
-
-bool DoubleResetDetector::doubleResetDetected() {
-	return doubleReset;
+bool DoubleResetDetector::detectDoubleReset() {
+	doubleResetDetected = detectRecentlyResetFlag();
+	if (doubleResetDetected) {
+		clearRecentlyResetFlag();
+	} else {
+		setRecentlyResetFlag();
+		waitingForDoubleReset = true;
+	}
+	return doubleResetDetected;
 }
 
 void DoubleResetDetector::loop() {
-  if (waitingForDoubleReboot && millis() > timeout) stop();
+	if (waitingForDoubleReset && millis() > timeout) stop();
 }
 
 void DoubleResetDetector::stop() {
-  if (fsMounted && SPIFFS.exists("/booted")) {
-    if (!SPIFFS.remove("/booted")) {
-      Serial.println("failed to remove /booted");
-    } else {
-      Serial.println("/booted removed");
-    }
-  }
-  waitingForDoubleReboot = false;
+	clearRecentlyResetFlag();
+	waitingForDoubleReset = false;
+}
+
+bool DoubleResetDetector::detectRecentlyResetFlag() {
+	doubleResetDetectorFlag = DOUBLERESETDETECTOR_FLAG_CLEAR;
+	ESP.rtcUserMemoryRead(address, &doubleResetDetectorFlag, sizeof(doubleResetDetectorFlag));
+	doubleResetDetected = doubleResetDetectorFlag == DOUBLERESETDETECTOR_FLAG_SET;
+	return doubleResetDetected;
+}
+
+void DoubleResetDetector::setRecentlyResetFlag() {
+	doubleResetDetectorFlag = DOUBLERESETDETECTOR_FLAG_SET;
+	ESP.rtcUserMemoryWrite(address, &doubleResetDetectorFlag, sizeof(doubleResetDetectorFlag));
+}
+
+void DoubleResetDetector::clearRecentlyResetFlag() {
+	doubleResetDetectorFlag = DOUBLERESETDETECTOR_FLAG_CLEAR;
+	ESP.rtcUserMemoryWrite(address, &doubleResetDetectorFlag, sizeof(doubleResetDetectorFlag));
 }
 // EOF
