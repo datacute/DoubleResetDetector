@@ -1,6 +1,6 @@
 /*
 	FILE: 		DoubleResetDetector.cpp
-	VERSION: 	0.0.1
+	VERSION: 	0.0.2
 	PURPOSE: 	Trigger configure mode by resetting Arduino twice.
 	LICENCE:	GPL v3 (http://www.gnu.org/licenses/gpl.html)
  */
