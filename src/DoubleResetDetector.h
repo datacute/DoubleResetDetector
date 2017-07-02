@@ -1,8 +1,8 @@
 /*
 	FILE: 		DoubleResetDetector.h
-	VERSION: 	0.0.2
-	PURPOSE: 	Trigger configure mode by resetting Arduino twice.
-	LICENCE:	GPL v3 (http://www.gnu.org/licenses/gpl.html)
+	VERSION: 	1.0.0
+	PURPOSE: 	Trigger configure mode by resetting ESP8266 twice.
+	LICENCE:	MIT
  */
 
 #ifndef DoubleResetDetector_H__
@@ -14,7 +14,7 @@
 #include <WProgram.h>
 #endif
 
-#define DOUBLERESETDETECTOR_VERSION "0.0.2"
+#define DOUBLERESETDETECTOR_VERSION "1.0.0"
 #define DOUBLERESETDETECTOR_FLAG_SET 0xD0D01234
 #define DOUBLERESETDETECTOR_FLAG_CLEAR 0xD0D04321
 
