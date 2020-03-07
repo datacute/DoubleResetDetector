@@ -28,7 +28,7 @@ public:
 	void stop();
 	
 private:
-	int timeout;
+	unsigned long timeout;
 	int address;
 	bool waitingForDoubleReset;
 	bool detectRecentlyResetFlag();
